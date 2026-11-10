@@ -1,0 +1,418 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block bodyclass %}{{ block.super }} app-contact model-contactoverview change-list{% endblock %}
+
+{% block coltype %}flex{% endblock %}
+
+{% block content %}
+<style>
+    /* ---------------------------------------------------------------
+       数据概览页样式
+       配色沿用官网的设计令牌（象牙白 / 黄铜 / 墨色），
+       与 simpleui 的浅色后台保持协调。
+       --------------------------------------------------------------- */
+    .ov-wrap {
+        --ov-ivory: #f7f5f1;
+        --ov-cream: #efece6;
+        --ov-sand: #e5e0d7;
+        --ov-taupe: #a8a099;
+        --ov-stone: #6b6560;
+        --ov-ink: #2b2825;
+        --ov-espresso: #4a423a;
+        --ov-brass: #a88b5f;
+        --ov-serif: "Songti SC", "SimSun", Georgia, "Times New Roman", serif;
+
+        padding: 8px 4px 40px;
+        color: var(--ov-ink);
+        font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 顶部标题 */
+    .ov-head {
+        border-bottom: 1px solid var(--ov-sand);
+        padding-bottom: 18px;
+        margin-bottom: 26px;
+    }
+    .ov-head__eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.28em;
+        color: var(--ov-brass);
+        text-transform: uppercase;
+        margin: 0 0 10px;
+    }
+    .ov-head__title {
+        font-family: var(--ov-serif);
+        font-size: 30px;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        margin: 0 0 8px;
+        color: var(--ov-ink);
+    }
+    .ov-head__desc {
+        font-size: 13px;
+        color: var(--ov-stone);
+        line-height: 1.8;
+        margin: 0;
+    }
+    .ov-head__meta {
+        font-size: 12px;
+        color: var(--ov-taupe);
+        margin-top: 12px;
+    }
+
+    /* 关键指标卡 */
+    .ov-kpis {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+    .ov-kpi {
+        flex: 1 1 150px;
+        background: #fff;
+        border: 1px solid var(--ov-sand);
+        border-left: 2px solid var(--ov-brass);
+        padding: 18px 20px;
+    }
+    .ov-kpi__num {
+        font-family: var(--ov-serif);
+        font-size: 34px;
+        line-height: 1.1;
+        color: var(--ov-ink);
+    }
+    .ov-kpi__label {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        color: var(--ov-stone);
+        margin-top: 8px;
+    }
+
+    /* 栅格 */
+    .ov-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .ov-col {
+        flex: 1 1 340px;
+        background: #fff;
+        border: 1px solid var(--ov-sand);
+        padding: 20px 22px 22px;
+    }
+    .ov-col--wide {
+        flex-basis: 100%;
+    }
+    .ov-col__title {
+        font-family: var(--ov-serif);
+        font-size: 17px;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        color: var(--ov-ink);
+        margin: 0 0 4px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--ov-cream);
+    }
+    .ov-col__hint {
+        font-size: 12px;
+        color: var(--ov-taupe);
+        margin: 10px 0 0;
+    }
+
+    /* 条形分布 */
+    .ov-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .ov-bar__label {
+        flex: 0 0 108px;
+        font-size: 13px;
+        color: var(--ov-stone);
+        text-align: right;
+    }
+    .ov-bar__track {
+        flex: 1 1 auto;
+        background: var(--ov-cream);
+        height: 10px;
+        position: relative;
+    }
+    .ov-bar__fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: var(--ov-brass);
+        min-width: 2px;
+    }
+    .ov-bar__num {
+        flex: 0 0 74px;
+        font-size: 12px;
+        color: var(--ov-taupe);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* 近 7 天趋势 */
+    .ov-trend {
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        height: 150px;
+        padding-top: 12px;
+    }
+    .ov-trend__item {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        height: 100%;
+    }
+    .ov-trend__bar {
+        width: 100%;
+        max-width: 46px;
+        background: var(--ov-brass);
+        min-height: 2px;
+    }
+    .ov-trend__value {
+        font-size: 12px;
+        color: var(--ov-stone);
+        margin-bottom: 6px;
+        font-variant-numeric: tabular-nums;
+    }
+    .ov-trend__label {
+        font-size: 11px;
+        color: var(--ov-taupe);
+        margin-top: 8px;
+    }
+
+    /* 最近提交表 */
+    .ov-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+        font-size: 13px;
+    }
+    .ov-table th {
+        text-align: left;
+        font-weight: 400;
+        color: var(--ov-taupe);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--ov-sand);
+    }
+    .ov-table td {
+        padding: 11px 8px;
+        border-bottom: 1px solid var(--ov-cream);
+        color: var(--ov-stone);
+        vertical-align: top;
+    }
+    .ov-table td:first-child {
+        color: var(--ov-ink);
+    }
+    .ov-empty {
+        font-size: 13px;
+        color: var(--ov-taupe);
+        padding: 22px 0;
+        text-align: center;
+    }
+
+    /* 状态标签 */
+    .ov-tag {
+        display: inline-block;
+        padding: 2px 9px;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        border: 1px solid currentColor;
+        color: var(--ov-taupe);
+    }
+    .ov-tag--pending  { color: #a8802f; }
+    .ov-tag--followed { color: #5a7d8c; }
+    .ov-tag--deal     { color: #6b7f52; }
+    .ov-tag--invalid  { color: #9b8d84; }
+
+    /* 操作入口 */
+    .ov-actions {
+        margin-top: 26px;
+        padding-top: 18px;
+        border-top: 1px solid var(--ov-sand);
+    }
+    .ov-btn {
+        display: inline-block;
+        padding: 9px 22px;
+        background: var(--ov-espresso);
+        color: #f4f1ec;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        border: 1px solid var(--ov-espresso);
+    }
+    .ov-btn:hover {
+        background: var(--ov-ink);
+        color: #f4f1ec;
+        text-decoration: none;
+    }
+</style>
+
+<div class="ov-wrap">
+
+    <div class="ov-head">
+        <p class="ov-head__eyebrow">联系表单</p>
+        <h1 class="ov-head__title">数据概览</h1>
+        <p class="ov-head__desc">
+            以下全部数据均实时查询自 <code>contact</code> 数据表，
+            与官网「联系」页面提交的留言完全一致。
+        </p>
+        <p class="ov-head__meta">
+            当前共 {{ summary.total }} 条留言 · 今日新增 {{ summary.today_count }} 条 · 近 7 天新增 {{ summary.week_count }} 条
+        </p>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="ov-kpis">
+        <div class="ov-kpi">
+            <div class="ov-kpi__num">{{ summary.total }}</div>
+            <div class="ov-kpi__label">累计留言</div>
+        </div>
+        <div class="ov-kpi">
+            <div class="ov-kpi__num">{{ summary.today_count }}</div>
+            <div class="ov-kpi__label">今日新增</div>
+        </div>
+        <div class="ov-kpi">
+            <div class="ov-kpi__num">{{ summary.week_count }}</div>
+            <div class="ov-kpi__label">近 7 天新增</div>
+        </div>
+        <div class="ov-kpi">
+            <div class="ov-kpi__num">
+                {% for row in summary.status_rows %}{% if row.value == 'pending' %}{{ row.count }}{% endif %}{% endfor %}
+            </div>
+            <div class="ov-kpi__label">待跟进</div>
+        </div>
+    </div>
+
+    <div class="ov-grid">
+
+        <!-- 处理状态分布 -->
+        <div class="ov-col">
+            <h2 class="ov-col__title">处理状态分布</h2>
+            {% for row in summary.status_rows %}
+            <div class="ov-bar">
+                <div class="ov-bar__label">{{ row.label }}</div>
+                <div class="ov-bar__track">
+                    <div class="ov-bar__fill" style="width: {{ row.percent }}%"></div>
+                </div>
+                <div class="ov-bar__num">{{ row.count }} 条 · {{ row.percent }}%</div>
+            </div>
+            {% empty %}
+            <p class="ov-empty">暂无数据</p>
+            {% endfor %}
+        </div>
+
+        <!-- 需求类型分布 -->
+        <div class="ov-col">
+            <h2 class="ov-col__title">需求类型分布</h2>
+            {% for row in summary.demand_rows %}
+            <div class="ov-bar">
+                <div class="ov-bar__label">{{ row.label }}</div>
+                <div class="ov-bar__track">
+                    <div class="ov-bar__fill" style="width: {{ row.percent }}%"></div>
+                </div>
+                <div class="ov-bar__num">{{ row.count }} 条 · {{ row.percent }}%</div>
+            </div>
+            {% empty %}
+            <p class="ov-empty">暂无数据</p>
+            {% endfor %}
+        </div>
+
+        <!-- 预算区间分布 -->
+        <div class="ov-col">
+            <h2 class="ov-col__title">预算区间分布</h2>
+            {% for row in summary.budget_rows %}
+            <div class="ov-bar">
+                <div class="ov-bar__label">{{ row.label }}</div>
+                <div class="ov-bar__track">
+                    <div class="ov-bar__fill" style="width: {{ row.percent }}%"></div>
+                </div>
+                <div class="ov-bar__num">{{ row.count }} 条 · {{ row.percent }}%</div>
+            </div>
+            {% empty %}
+            <p class="ov-empty">暂无数据</p>
+            {% endfor %}
+        </div>
+
+        <!-- 城市 Top -->
+        <div class="ov-col">
+            <h2 class="ov-col__title">客户所在城市 Top 5</h2>
+            {% for row in summary.city_rows %}
+            <div class="ov-bar">
+                <div class="ov-bar__label">{{ row.label }}</div>
+                <div class="ov-bar__track">
+                    <div class="ov-bar__fill" style="width: {{ row.percent }}%"></div>
+                </div>
+                <div class="ov-bar__num">{{ row.count }} 条 · {{ row.percent }}%</div>
+            </div>
+            {% empty %}
+            <p class="ov-empty">暂无数据</p>
+            {% endfor %}
+            <p class="ov-col__hint">仅统计填写了所在城市的留言</p>
+        </div>
+
+        <!-- 近 7 天趋势 -->
+        <div class="ov-col ov-col--wide">
+            <h2 class="ov-col__title">近 7 天提交趋势</h2>
+            <div class="ov-trend">
+                {% for day in summary.trend %}
+                <div class="ov-trend__item">
+                    <div class="ov-trend__value">{{ day.count }}</div>
+                    <div class="ov-trend__bar" style="height: {% if day.height_px > 0 %}{{ day.height_px }}px{% else %}2px{% endif %}"></div>
+                    <div class="ov-trend__label">{{ day.label }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 最近提交 -->
+        <div class="ov-col ov-col--wide">
+            <h2 class="ov-col__title">最近提交</h2>
+            {% if summary.recent %}
+            <table class="ov-table">
+                <thead>
+                    <tr>
+                        <th>称呼</th>
+                        <th>联系电话</th>
+                        <th>所在城市</th>
+                        <th>需求类型</th>
+                        <th>预算区间</th>
+                        <th>状态</th>
+                        <th>提交时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in summary.recent %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.phone }}</td>
+                        <td>{{ item.city|default:'—' }}</td>
+                        <td>{{ item.get_demand_type_display|default:'—' }}</td>
+                        <td>{{ item.get_budget_display|default:'—' }}</td>
+                        <td><span class="ov-tag ov-tag--{{ item.status }}">{{ item.get_status_display }}</span></td>
+                        <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="ov-empty">暂无留言记录</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="ov-actions">
+        <a class="ov-btn" href="{% url 'admin:contact_contactmessage_changelist' %}">进入咨询留言列表 →</a>
+    </div>
+
+</div>
+{% endblock %}

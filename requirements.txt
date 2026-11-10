@@ -1,0 +1,13 @@
+asgiref==3.13.0
+certifi==2026.10.23
+charset-normalizer==3.5.2
+Django==6.1.2
+django-simpleui==2026.1.13
+djangorestframework==3.18.3
+fonttools==4.68.0
+idna==3.20
+pip==26.3
+requests==2.34.2
+sqlparse==0.6.1
+tzdata==2026.6
+urllib3==2.8.0

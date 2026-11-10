@@ -1,6 +1,6 @@
 # 课序 大学生课表系统项目展示网站
 
-参考 Week9 项目采用 Vue 3 + Vite 多页面前端、Django + Django REST Framework 后端和 SQLite 数据库。网站介绍需求文档中的目标系统；首页课表为示例，目标系统的课程管理、学校导入、提醒及 AI 尚未在本网站实现。反馈表单写入本地数据库，可通过 Django 管理后台查看。
+采用 Vue 3 + Vite 多页面前端、Django + Django REST Framework 后端和 SQLite 数据库。网站介绍需求文档中的目标系统；首页课表为示例，目标系统的课程管理、学校导入、提醒及 AI 尚未在本网站实现。反馈表单写入本地数据库，可通过 Django 管理后台查看。
 
 ## 启动
 

@@ -1,0 +1,16 @@
+[Unit]
+Description=Course Order Django application
+After=network.target
+
+[Service]
+Type=simple
+User=courseorder
+Group=courseorder
+WorkingDirectory=/opt/course-order
+EnvironmentFile=/etc/course-order.env
+ExecStart=/opt/course-order/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --access-logfile - --error-logfile -
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

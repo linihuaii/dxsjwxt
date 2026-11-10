@@ -16,3 +16,9 @@ class WebConfig(AppConfig):
         from django.db.models import fields
 
         fields.BLANK_CHOICE_LABEL = '请选择'
+
+        # SimpleUI 启动时会移除此中间件；生产环境恢复同源 iframe 保护。
+        from django.conf import settings
+        frame_middleware = 'django.middleware.clickjacking.XFrameOptionsMiddleware'
+        if getattr(settings, 'RESTORE_FRAME_MIDDLEWARE', False) and frame_middleware not in settings.MIDDLEWARE:
+            settings.MIDDLEWARE.append(frame_middleware)

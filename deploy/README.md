@@ -1,6 +1,6 @@
 # 腾讯云部署指南
 
-本指南将展示网站部署到一台 Ubuntu 轻量应用服务器：Nginx 提供静态资源并代理 Gunicorn，Django 使用单机 SQLite 存储反馈。网站展示的是课表系统需求，课程管理和 AI 等目标功能本身尚未实现。本指南使用域名和 HTTPS；需要一台有公网 IPv4 的服务器、可管理的域名，以及能 SSH 登录并使用 sudo 的账户。
+本指南将课序官网部署到一台 Ubuntu 轻量应用服务器。Nginx 提供静态资源并代理 Gunicorn，Django 使用单机 SQLite 存储反馈。官网展示产品功能，并提供[线上课序](https://152.136.97.64/)的登录入口。本指南使用域名和 HTTPS，需要一台有公网 IPv4 的服务器、可管理的域名，以及能 SSH 登录并使用 sudo 的账户。
 
 ## 1. 准备云资源
 
@@ -17,7 +17,7 @@
 sudo apt update
 sudo apt install -y git nginx certbot python3-certbot-nginx
 sudo useradd --system --home-dir /opt/course-order --shell /usr/sbin/nologin courseorder
-sudo git clone https://github.com/linihuaii/-.git /opt/course-order
+sudo git clone https://github.com/linihuaii/dxsjwxt.git /opt/course-order
 sudo chown -R courseorder:courseorder /opt/course-order
 sudo install -d -o courseorder -g courseorder -m 750 /var/lib/course-order
 cd /opt/course-order
